@@ -292,10 +292,14 @@ class TensorBoardOutput(AsyncOutput):
 
 class WandBOutput:
 
-  def __init__(self, name, pattern=r'.*', **kwargs):
+  def __init__(self, config, pattern=r'.*', **kwargs):
     self._pattern = re.compile(pattern)
     import wandb
-    wandb.init(name=name, **kwargs)
+    wandb.init(
+        project=config.wandb_project,
+        name=f"{config.wandb_name}_{config.task}_{config.seed}",
+        config=dict(config),
+    )
     self._wandb = wandb
 
   def __call__(self, summaries):
