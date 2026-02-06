@@ -183,6 +183,8 @@ class JSONLOutput(AsyncOutput):
     for step, name, value in summaries:
       if not self._pattern.search(name):
         continue
+      if "actions" in name:
+        continue
       if isinstance(value, str) and self._strings:
         bystep[step][name] = value
       if isinstance(value, np.ndarray) and len(value.shape) == 0:
@@ -315,6 +317,8 @@ class WandBOutput:
       elif len(value.shape) == 1:
         bystep[step][name] = wandb.Histogram(value)
       elif len(value.shape) in (2, 3):
+        if "actions" in name:
+          continue
         value = value[..., None] if len(value.shape) == 2 else value
         assert value.shape[3] in [1, 3, 4], value.shape
         if value.dtype != np.uint8:
@@ -346,6 +350,8 @@ class ScopeOutput(AsyncOutput):
   def _write(self, summaries):
     for step, name, value in summaries:
       if self.pattern and not self.pattern.search(name):
+        continue
+      if "actions" in name:
         continue
       self.writer.add(step, {name: value})
     self.writer.flush()
